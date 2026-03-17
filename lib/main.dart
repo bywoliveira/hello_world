@@ -1,20 +1,68 @@
 import 'package:flutter/material.dart';
+
 void main() {
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       home: Scaffold(
+        appBar: AppBar(title: Text("Exemplo Column")),
         body: Center(
-          child: Text(
-            'Hello, \n Bianca',
-            style: TextStyle(fontSize:30),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+
+              // Container de cima
+              Container(
+                width: 200,
+                height: 100,
+                color: Colors.blue,
+                child: Center(
+                  child: Text(
+                    "Container 1",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ),
+
+              SizedBox(height: 20),
+
+              
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+
+                  Container(
+                    width: 80,
+                    height: 100,
+                    color: Colors.red,
+                    child: Center(
+                      child: Text(
+                        "Container 2",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ),
+
+                  SizedBox(width: 20),
+
+                  Container(
+                    width: 80,
+                    height: 100,
+                    color: Colors.green,
+                    child: Center(
+                      child: Text(
+                        "Container 3",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ),
