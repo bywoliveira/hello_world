@@ -11,15 +11,22 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        body: Container(
-          decoration: const BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage("assets/images/atack.jpg"),
-              fit: BoxFit.fitWidth,
-            )
+        appBar: AppBar(
+          title : const Text("Texto e Imagem"),
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const SizedBox(height: 20),
+              Image.asset(
+                'assets/images/atack.jpg',
+                width: 200,
+              ),
+            ],
           ),
-        )
-      ));
+        ),
+      ),
+    );
   }
 }
-
