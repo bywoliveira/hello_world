@@ -11,14 +11,10 @@ class MyApp extends StatelessWidget {
       home: Scaffold(
         appBar: AppBar(title: Text("Meu cartão")),
         body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-
-              // Container de cima
+          child:
                Container(
                width: 350,
-              height: 240,
+              height: 220,
               padding: EdgeInsets.all(8),  
             decoration: BoxDecoration(
             color: const Color.fromARGB(255, 87, 8, 101), 
@@ -27,40 +23,69 @@ class MyApp extends StatelessWidget {
            
            
             child :
-             Row(
+             Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
              crossAxisAlignment: CrossAxisAlignment.start,
              children: [
-            Text(
-            "Banco sesi/senai", 
-             style: TextStyle(color: Colors.white),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+               Text(
+               "Banco sesi/senai", 
+              style: TextStyle(color: Colors.white),
                 ),
-                SizedBox(height: 90),
-              Text(
-              "1234 5678",
-              style: TextStyle(color: Colors.white)
-              ),
-             
-                Column (
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                SizedBox(width: 40),
                 Icon(Icons.contactless, size: 30, color: const Color.fromARGB(255, 239, 235, 234)),
-                
-                SizedBox(height: 35),
+                ],
+              ),
+                Row (
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                SizedBox(width: 20),
 
                 Icon(Icons.sim_card, size: 30, color: const Color.fromARGB(255, 239, 235, 234)),
-
-                
                   ],
                 ),
-                
-                    ],           
-                  )
-               ),
-            ]
-      
-          )
+                Text(
+                 "1234 5678 9012 3456",
+                 style:TextStyle(color: Colors.white,
+                 fontSize: 22,
+                 letterSpacing: 2,
+                 ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Titular",
+                          style: TextStyle(color: Colors.white70, fontSize:12),
+
+                        ),
+                        Text(
+                          "Bianca Moreira De Oliveira",
+                          style: TextStyle(color: Colors.white, fontSize: 16),
+                        )
+                      ],
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Validade",
+                          style: TextStyle(color: Colors.white70, fontSize:12),
+                        ),
+                        Text("12/30",
+                        style:TextStyle(color:Colors.white, fontSize:16),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
