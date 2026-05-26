@@ -1,88 +1,145 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-
 import 'pages/produto_page.dart';
 import 'pages/carrinho_page.dart';
 
-// ─── ESTADO GLOBAL DO CARRINHO ───────────────────────────────────────────────
-// Mapa de produtoId → quantidade. Notifica widgets ao mudar.
+// ─── MODELO DO PRODUTO ────────────────────────────────────────────────────
+class Suculenta {
+  final int id;
+  final String nome;
+  final String nomeCientifico;
+  final String emoji;
+  final double preco;
+  final String descricao;
+
+  const Suculenta({
+    required this.id,
+    required this.nome,
+    required this.nomeCientifico,
+    required this.emoji,
+    required this.preco,
+    required this.descricao,
+  });
+}
+
+// ─── CATÁLOGO (4 ESPÉCIES) ────────────────────────────────────────────────
+const List<Suculenta> produtos = [
+  Suculenta(
+    id: 1,
+    nome: 'Roseta-de-Pedra',
+    nomeCientifico: 'Echeveria elegans',
+    emoji: '🌸',
+    preco: 18.90,
+    descricao: 'Suculenta compacta com folhas em roseta verde-azuladas.',
+  ),
+  Suculenta(
+    id: 2,
+    nome: 'Muda feijão',
+    nomeCientifico: 'Haworthiopsis attenuata',
+    emoji: '🌱',
+    preco: 5.00,
+    descricao: 'O principal grão das refeições brasileiras.',
+  ),
+  Suculenta(
+    id: 3,
+    nome: 'Babosa',
+    nomeCientifico: 'Aloe vera',
+    emoji: '🌿',
+    preco: 32.00,
+    descricao: 'Gel das folhas hidrata a pele e alivia queimaduras.',
+  ),
+  Suculenta(
+    id: 4,
+    nome: 'Cacto-Ouriço',
+    nomeCientifico: 'Echinocactus grusonii',
+    emoji: '🌵',
+    preco: 15.00,
+    descricao: 'praticamente não precisa de água.',
+  ),
+];
+
+// ─── CARRINHO SIMPLES ─────────────────────────────────────────────────────
+class ItemCarrinho {
+  final Suculenta produto;
+  int quantidade;
+
+  ItemCarrinho(this.produto, this.quantidade);
+}
+
 class CarrinhoController extends ChangeNotifier {
-  final Map<int, int> _itens = {}; // { produtoId: quantidade }
+  List<ItemCarrinho> itens = [];
 
-  Map<int, int> get itens => Map.unmodifiable(_itens);
-
-  int quantidade(int produtoId) => _itens[produtoId] ?? 0;
-
-  int get totalItens => _itens.values.fold(0, (soma, q) => soma + q);
-
-  double get totalPreco {
-    double total = 0;
-    for (final entry in _itens.entries) {
-      final produto = produtos.where((p) => p.id == entry.key).firstOrNull;
-      if (produto != null) total += produto.preco * entry.value;
+  void adicionar(Suculenta produto) {
+    // Verifica se o produto já está no carrinho
+    for (var item in itens) {
+      if (item.produto.id == produto.id) {
+        item.quantidade++;
+        notifyListeners();
+        return;
+      }
     }
-    return total;
-  }
-
-  void adicionar(int produtoId) {
-    _itens[produtoId] = (_itens[produtoId] ?? 0) + 1;
+    // Se não estiver, adiciona novo item
+    itens.add(ItemCarrinho(produto, 1));
     notifyListeners();
   }
 
-  void remover(int produtoId) {
-    if (!_itens.containsKey(produtoId)) return;
-    if (_itens[produtoId]! <= 1) {
-      _itens.remove(produtoId);
-    } else {
-      _itens[produtoId] = _itens[produtoId]! - 1;
+  void remover(Suculenta produto) {
+    for (int i = 0; i < itens.length; i++) {
+      if (itens[i].produto.id == produto.id) {
+        if (itens[i].quantidade > 1) {
+          itens[i].quantidade--;
+        } else {
+          itens.removeAt(i);
+        }
+        notifyListeners();
+        return;
+      }
     }
+  }
+
+  void removerItemCompleto(Suculenta produto) {
+    itens.removeWhere((item) => item.produto.id == produto.id);
     notifyListeners();
   }
 
-  void removerTodos(int produtoId) {
-    _itens.remove(produtoId);
-    notifyListeners();
+  double get total {
+    double soma = 0;
+    for (var item in itens) {
+      soma += item.produto.preco * item.quantidade;
+    }
+    return soma;
+  }
+
+  int get totalItens {
+    int soma = 0;
+    for (var item in itens) {
+      soma += item.quantidade;
+    }
+    return soma;
   }
 
   void limpar() {
-    _itens.clear();
+    itens.clear();
     notifyListeners();
   }
-
-  List<Suculenta> get produtosNoCarrinho =>
-      produtos.where((p) => _itens.containsKey(p.id)).toList();
 }
 
-// Instância global acessível por todas as páginas
 final carrinho = CarrinhoController();
 
-// ─── AUTENTICAÇÃO (simulada) ─────────────────────────────────────────────────
-bool usuarioLogado = false;
-
-// ─── GOROUTER ───────────────────────────────────────────────────────────────
+// ─── ROTAS ────────────────────────────────────────────────────────────────
 final GoRouter router = GoRouter(
   initialLocation: '/',
-  redirect: (context, state) {
-    final tentandoAcessarCarrinho = state.matchedLocation == '/carrinho';
-    if (!usuarioLogado && tentandoAcessarCarrinho) return '/';
-    return null;
-  },
   routes: [
-    GoRoute(
-      path: '/',
-      builder: (context, state) => const HomePage(),
-    ),
+    GoRoute(path: '/', builder: (context, state) => const HomePage()),
     GoRoute(
       path: '/produto/:id',
       builder: (context, state) {
-        final id = int.tryParse(state.pathParameters['id'] ?? '') ?? 0;
-        return ProdutoPage(produtoId: id);
+        final id = int.parse(state.pathParameters['id']!);
+        final produto = produtos.firstWhere((p) => p.id == id);
+        return ProdutoPage(produto: produto);
       },
     ),
-    GoRoute(
-      path: '/carrinho',
-      builder: (context, state) => const CarrinhoPage(),
-    ),
+    GoRoute(path: '/carrinho', builder: (context, state) => const CarrinhoPage()),
   ],
 );
 
@@ -105,90 +162,7 @@ class MeuApp extends StatelessWidget {
   }
 }
 
-// ─── MODELO ──────────────────────────────────────────────────────────────────
-class Suculenta {
-  final int id;
-  final String nome;
-  final String nomeCientifico;
-  final String emoji;
-  final double preco;
-  final String descricao;
-
-  const Suculenta({
-    required this.id,
-    required this.nome,
-    required this.nomeCientifico,
-    required this.emoji,
-    required this.preco,
-    required this.descricao,
-  });
-}
-
-// ─── CATÁLOGO ────────────────────────────────────────────────────────────────
-const List<Suculenta> produtos = [
-  Suculenta(
-    id: 1,
-    nome: 'Roseta-de-Pedra',
-    nomeCientifico: 'Echeveria elegans',
-    emoji: '🌸',
-    preco: 18.90,
-    descricao:
-        'Suculenta compacta com folhas em roseta de tom verde-azulado. '
-        'Produz flores rosas na primavera e é perfeita para vasos pequenos.',
-  ),
-  Suculenta(
-    id: 2,
-    nome: 'Zebrina',
-    nomeCientifico: 'Haworthiopsis attenuata',
-    emoji: '🦓',
-    preco: 24.50,
-    descricao:
-        'Conhecida pelas listras brancas que lembram a zebra. '
-        'Tolera meia-sombra, ideal para ambientes internos com pouca luz direta.',
-  ),
-  Suculenta(
-    id: 3,
-    nome: 'Babosa',
-    nomeCientifico: 'Aloe vera',
-    emoji: '🌿',
-    preco: 32.00,
-    descricao:
-        'Clássica e multifuncional — o gel das folhas alivia queimaduras e hidrata a pele. '
-        'Cresce rápido e fica linda em vasos maiores na varanda.',
-  ),
-  Suculenta(
-    id: 4,
-    nome: 'Cacto-Ouriço',
-    nomeCientifico: 'Echinocactus grusonii',
-    emoji: '🌵',
-    preco: 15.00,
-    descricao:
-        'Esférico, robusto e cheio de espinhos dourados. '
-        'Praticamente não precisa de rega — aguenta semanas sem água.',
-  ),
-  Suculenta(
-    id: 5,
-    nome: 'Língua-de-Sogra',
-    nomeCientifico: 'Dracaena trifasciata',
-    emoji: '🗡️',
-    preco: 27.00,
-    descricao:
-        'Folhas eretas com bordas amarelas e padrão marmoreado. '
-        'Purifica o ar e sobrevive a quase tudo — sol, sombra e esquecimento.',
-  ),
-  Suculenta(
-    id: 6,
-    nome: 'Dedos-de-Fada',
-    nomeCientifico: 'Pachyphytum oviferum',
-    emoji: '💜',
-    preco: 21.00,
-    descricao:
-        'Folhas ovais com tom lilás-prateado e toque aveludado. '
-        'Uma das suculentas mais delicadas e fotogênicas do mercado.',
-  ),
-];
-
-// ─── HOME PAGE ───────────────────────────────────────────────────────────────
+// ─── HOME PAGE ────────────────────────────────────────────────────────────
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
@@ -200,18 +174,16 @@ class HomePage extends StatelessWidget {
         backgroundColor: const Color(0xFF4A7C59),
         foregroundColor: Colors.white,
         actions: [
-          // Ícone do carrinho com badge de quantidade
           ListenableBuilder(
             listenable: carrinho,
             builder: (context, _) {
-              final total = carrinho.totalItens;
               return Stack(
                 children: [
                   IconButton(
                     icon: const Icon(Icons.shopping_cart_outlined),
                     onPressed: () => context.push('/carrinho'),
                   ),
-                  if (total > 0)
+                  if (carrinho.totalItens > 0)
                     Positioned(
                       right: 6,
                       top: 6,
@@ -222,7 +194,7 @@ class HomePage extends StatelessWidget {
                           shape: BoxShape.circle,
                         ),
                         child: Text(
-                          '$total',
+                          '${carrinho.totalItens}',
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 10,
@@ -242,7 +214,6 @@ class HomePage extends StatelessWidget {
         itemCount: produtos.length,
         itemBuilder: (context, index) {
           final produto = produtos[index];
-
           return Card(
             margin: const EdgeInsets.only(bottom: 12),
             child: ListTile(
