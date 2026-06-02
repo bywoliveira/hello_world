@@ -202,7 +202,7 @@ void mostrarSnackBar(
                                       },
 
                                       style: TextButton.styleFrom(
-                                        foregroundColor: Colors.red,
+                                        foregroundColor: const Color.fromARGB(255, 93, 228, 132),
                                       ),
 
                                       child: Text(
@@ -253,7 +253,7 @@ void mostrarSnackBar(
 
                           child: Row(
                             children: [
-                              Icon(Icons.delete, color: Colors.red, size: 30),
+                              Icon(Icons.delete, color: const Color.fromARGB(255, 49, 212, 152), size: 30),
 
                               SizedBox(width: 10),
 
