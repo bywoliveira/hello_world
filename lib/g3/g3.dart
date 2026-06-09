@@ -61,7 +61,7 @@ class _TarefasPageState extends State<TarefasPage> { //logica do estado da pagin
           ),
           ElevatedButton(
             onPressed: _salvarTarefa,
-            style: ElevatedButton.styleFrom(
+            style: ElevatedButton.styleFrom(    
               backgroundColor: const Color.fromARGB(255, 26, 191, 197),
               foregroundColor: Colors.blue,
             ),
