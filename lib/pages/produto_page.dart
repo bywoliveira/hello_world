@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:hello_world/main.dart';
+import 'package:hello_world/main_go_routter.dart';
 
 class ProdutoPage extends StatelessWidget {
   final Suculenta produto;
